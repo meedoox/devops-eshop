@@ -52,7 +52,7 @@ jobs:
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Cache node modules and build folder
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: actions/cache@v2
         with:
           path: |
@@ -95,7 +95,7 @@ jobs:
     needs: [Build, Test]
     runs-on: ubuntu-latest
 
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Git Checkout
