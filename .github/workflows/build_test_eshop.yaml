@@ -2,6 +2,12 @@ name: Build and tests our Eshop
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   # Install all dependencies
@@ -112,5 +118,17 @@ jobs:
             ./build
           key: ${{ runner.os }}-build-${{ github.run_id }}
 
-      - name: Deploy to firebase
-        run: ./node_modules/.bin/firebase deploy --token ${{ secrets.FIREBASE }}
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          # Required, playbook filepath
+          playbook: ansible/ec2_deploy.yml
+          # Optional, directory where playbooks live
+          directory: ./
+          # Optional, SSH private key
+          key: ${{secrets.WORKFLOW_TOKEN}}
+          # Optional, SSH known hosts file content
+          known_hosts: .known_hosts
+          # Optional, encrypted vault password
+          vault_password: '123456'
+
