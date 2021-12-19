@@ -118,6 +118,14 @@ jobs:
             ./build
           key: ${{ runner.os }}-build-${{ github.run_id }}
 
+      # Step 1
+      - uses: actions/checkout@v2
+      # Step 2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      # Step 3
       - name: Install dependencies
         run: pip install ansible boto boto3
 
