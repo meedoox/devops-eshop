@@ -96,3 +96,39 @@ jobs:
 
       - name: Run Unit Tests
         run: npm run test -- --colors
+
+  Deploy:
+    needs: [Build, Test]
+    runs-on: ubuntu-latest
+
+    if: ${{ github.ref == 'refs/heads/main' }}
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2.4.0
+        with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+
+      - name: Load node modules and build folder
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            ./node_modules
+            ./build
+          key: ${{ runner.os }}-build-${{ github.run_id }}
+
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          # Required, playbook filepath
+          playbook: ansible/ec2_deploy.yml
+          # Optional, directory where playbooks live
+          directory: ./
+          # Optional, SSH private key
+          key: ${{secrets.WORKFLOW_TOKEN}}
+          # Optional, SSH known hosts file content
+          known_hosts: .known_hosts
+          # Optional, encrypted vault password
+          vault_password: '123456'
+
