@@ -1,4 +1,4 @@
-name: Build and tests our Eshop
+name: Run playbook
 
 on:
   workflow_dispatch:
@@ -9,114 +9,16 @@ on:
     branches:
       - main
 
-jobs:
-  # Install all dependencies
-  Install:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v2.4.0
-        with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v2.4.1
-        with:
-          node-version: 10
-
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: node_modules-
-
-      - name: Install with npm
-        run: |
-          npm ci
-
-  Build:
-    needs: Install
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v2.4.0
-        with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v2.4.1
-        with:
-          node-version: 10
-
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Cache node modules and build folder
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.npm
-            ./node_modules
-            ./build
-          key: ${{ runner.os }}-build-${{ github.run_id }}
-          restore-keys: ${{ runner.os }}-build-${{ github.run_id }}
-
-      - name: build
-        run: |
-          npm rebuild node-sass --force
-          npm run build -- --colors
-
-  Test:
-    needs: Install
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v2.4.0
-        with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v2.4.1
-        with:
-          node-version: 10
-
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Run Unit Tests
-        run: npm run test -- --colors
-
-  Deploy:
-    needs: [Build, Test]
-    runs-on: ubuntu-latest
-
-    if: ${{ github.ref == 'refs/heads/main' }}
-
-    steps:
-      - name: Git Checkout
-        uses: actions/checkout@v2.4.0
-        with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
-
-      - name: Load node modules and build folder
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.npm
-            ./node_modules
-            ./build
-          key: ${{ runner.os }}-build-${{ github.run_id }}
-
-      - name: Deploy to firebase
-        run: ./node_modules/.bin/firebase deploy --token ${{ secrets.FIREBASE }}
+uses: dawidd6/action-ansible-playbook@v2
+with:
+  # Required, playbook filepath
+  playbook: ansible/ec2_deploy.yml
+  # Optional, directory where playbooks live
+  directory: ./
+  # Optional, SSH private key
+  key: ${{secrets.WORKFLOW_TOKEN}}
+  # Optional, literal inventory file contents
+  # Optional, SSH known hosts file content
+  known_hosts: .known_hosts
+  # Optional, encrypted vault password
+  vault_password: '123456'
