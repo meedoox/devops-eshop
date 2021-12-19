@@ -101,7 +101,7 @@ jobs:
     needs: [Build, Test]
     runs-on: ubuntu-latest
 
-    if: ${{ github.ref == 'refs/heads/main' }}
+    #if: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Git Checkout
@@ -118,9 +118,13 @@ jobs:
             ./build
           key: ${{ runner.os }}-build-${{ github.run_id }}
 
+      - name: Install dependencies
+        run: pip install ansible boto boto3
+
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
+          pip3 install ansible boto boto3
           # Required, playbook filepath
           playbook: ansible/ec2_deploy.yml
           # Optional, directory where playbooks live
