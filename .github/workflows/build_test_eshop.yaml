@@ -131,7 +131,7 @@ jobs:
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
-          pip3 install ansible boto boto3
+          pip3 install -r requirements.txt
           # Required, playbook filepath
           playbook: ansible/ec2_deploy.yml
           # Optional, directory where playbooks live
