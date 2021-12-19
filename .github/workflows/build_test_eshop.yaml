@@ -127,7 +127,9 @@ jobs:
           python-version: 3.7
       # Step 3
       - name: Install dependencies
-        run: pip3 install -r requirements.txt
+        run: pip3 install boto
+      - name: Install dependencies
+        run: pip3 install boto3
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
